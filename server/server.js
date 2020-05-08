@@ -15,7 +15,7 @@ const filename = 'users.json'
 const port = process.env.PORT || 3000
 const server = express()
 
-const { readFile, writeFile, unlink, stat } = require('fs').promises
+const { readFile, writeFile, unlink } = require('fs').promises
 
 server.use(cors())
 
@@ -81,7 +81,7 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: +userId })
 })
 
-server.delete('/api/v1/users', (req, res) => {
+server.delete('/api/v1/users', async (res) => {
   unlink(`${__dirname}/${filename}`)
   res.json({ status: 'ok' })
 })
