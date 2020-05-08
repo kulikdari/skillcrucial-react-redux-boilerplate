@@ -1,5 +1,5 @@
-/* eslint-disable import/no-duplicates */
 import express from 'express'
+import axios from 'axios'
 import path from 'path'
 import cors from 'cors'
 import bodyParser from 'body-parser'
@@ -10,8 +10,12 @@ import Html from '../client/html'
 
 let connections = []
 
+const filename = 'users.json'
+
 const port = process.env.PORT || 3000
 const server = express()
+
+const { readFile, writeFile, unlink } = require('fs').promises
 
 server.use(cors())
 
@@ -21,6 +25,68 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use(cookieParser())
 
+const saveFile = async (data) => {
+  // eslint-disable-next-line no-return-await
+  return await writeFile(`${__dirname}/${filename}`, JSON.stringify(data), { encoding: 'utf8' })
+}
+
+const readData = async (fileName) => {
+  // eslint-disable-next-line no-return-await
+  return await readFile(`${__dirname}/${fileName}`, { encoding: 'utf8' })
+    .then((data) => JSON.parse(data))
+    .catch(async () => {
+      const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+      await saveFile(users)
+      return users
+    })
+}
+
+server.get('/api/v1/users', async (req, res) => {
+  const users = await readData(filename)
+  res.json(users)
+})
+
+server.post('/api/v1/users', async (req, res) => {
+  let newUser = req.body
+  let users = await readData(filename)
+  let maxValue = 0
+  for (let i = 0; i < users.length; i += 1) {
+    if (maxValue < users[i].id) {
+      maxValue = users[i].id
+    }
+  }
+  maxValue += 1
+  newUser = await { ...newUser, id: maxValue }
+  users = [...users, newUser]
+  await saveFile(users)
+  res.json({ status: 'success', id: maxValue })
+})
+
+server.patch('/api/v1/users/:userId', async (req, res) => {
+  let newUser = req.body
+  let users = await readData(filename)
+  const { userId } = req.params
+
+  newUser = { ...newUser, id: +userId }
+  users = users.filter((it) => it.id !== +userId)
+  users = [...users, newUser]
+  await saveFile(users)
+  res.json({ status: 'success', id: +userId })
+})
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  let users = await readData(filename)
+  const { userId } = req.params
+  users = users.filter((it) => it.id !== +userId)
+  await saveFile(users)
+  res.json({ status: 'success', id: +userId })
+})
+
+server.delete('/api/v1/users', async (req, res) => {
+  await unlink(`${__dirname}/${filename}`)
+  res.json({ status: 'ok' })
+})
+
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
@@ -29,7 +95,7 @@ server.use('/api/', (req, res) => {
 const echo = sockjs.createServer()
 echo.on('connection', (conn) => {
   connections.push(conn)
-  conn.on('data', async () => {})
+  conn.on('data', async () => { })
 
   conn.on('close', () => {
     connections = connections.filter((c) => c.readyState !== 3)
