@@ -82,10 +82,10 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users/', async (req, res) => {
-  stat(`${__dirname}/${filename}`)
+  stat(`${__dirname}/users.json`)
     .then(() => {
       res.json({ status: 'Success' })
-      unlink(`${__dirname}/${filename}`)
+      unlink(`${__dirname}/users.json`)
     })
     .catch((err) => res.json({ status: 'Error', ErrorMessage: err }))
 })
