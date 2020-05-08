@@ -66,7 +66,6 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
   let newUser = req.body
   let users = await readData(filename)
   const { userId } = req.params
-
   newUser = { ...newUser, id: +userId }
   users = users.filter((it) => it.id !== +userId)
   users = [...users, newUser]
@@ -83,7 +82,7 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users', async (req, res) => {
-  await unlink(`${__dirname}/${filename}`)
+  unlink(`${__dirname}/${filename}`)
   res.json({ status: 'ok' })
 })
 
