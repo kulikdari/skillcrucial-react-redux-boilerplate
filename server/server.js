@@ -85,7 +85,6 @@ server.delete('/api/v1/users', (req, res) => {
   // eslint-disable-next-line no-undef
   stat(`${__dirname}/${fileName}`)
     .then(() => {
-      // eslint-disable-next-line no-undef
       unlink(`${__dirname}/${filename}`)
       res.json({ status: 'ok' })
     })
