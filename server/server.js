@@ -83,10 +83,10 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 
 server.delete('/api/v1/users', (req, res) => {
   // eslint-disable-next-line no-undef
-  stat(`${dirname}/${fileName}`)
+  stat(`${__dirname}/${fileName}`)
     .then(() => {
       // eslint-disable-next-line no-undef
-      unlink(`${dirname}/${filename}`)
+      unlink(`${__dirname}/${filename}`)
       res.json({ status: 'ok' })
     })
     .catch((error) => res.json(error))
