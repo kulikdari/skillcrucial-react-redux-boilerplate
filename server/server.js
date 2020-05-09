@@ -45,19 +45,12 @@ server.get('/api/v1/users', async (req, res) => {
 })
 
 server.post('/api/v1/users', async (req, res) => {
-  let newUser = req.body
-  let users = await readData()
-  let maxValue = 0
-  for (let i = 0; i < users.length; i += 1) {
-    if (maxValue < users[i].id) {
-      maxValue = users[i].id
-    }
-  }
-  maxValue += 1
-  newUser = await { ...newUser, id: maxValue }
-  users = [...users, newUser]
-  await saveFile(users)
-  res.json({ status: 'success', id: maxValue })
+  const { newuser1 } = req.params
+  const users = await readData()
+  newuser1.id = users[users.lenght - 1].id + 1
+  const newUsers1 = users.concat(newuser1)
+  await saveFile(newUsers1)
+  res.json({ status: 'success', id: newuser1.id })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
@@ -71,9 +64,9 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  let users = await readData()
+  const users = await readData()
   const { userId } = req.params
-  users = users.filter((it) => it.id !== +userId)
+  users.filter((it) => it.id !== +userId)
   await saveFile(users)
   res.json({ status: 'success', id: +userId })
 })
