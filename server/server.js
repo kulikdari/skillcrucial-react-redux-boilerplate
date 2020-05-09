@@ -24,13 +24,11 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 server.use(cookieParser())
 
 const saveFile = async (users) => {
-  // eslint-disable-next-line no-return-await
-  return await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
+  return writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
 }
 
 const readData = async () => {
-  // eslint-disable-next-line no-return-await
-  return await readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
+  return readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
     .then((data) => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
@@ -55,11 +53,11 @@ server.post('/api/v1/users', async (req, res) => {
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const users = await readData()
-  const newUsers = users.map((item) => {
-    return item.id !== +userId ? it : { ...it, ...req.body }
+  const uses = await readData()
+  const newUsersd = uses.map((item) => {
+    return item.id !== +userId ? { ...item, ...req.body } : item
   })
-  await saveFile(newUsers)
+  await saveFile(newUsersd)
   res.json({ status: 'success', id: +userId })
 })
 
@@ -71,8 +69,8 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: +userId })
 })
 
-server.delete('/api/v1/users', async (res) => {
-  unlink(`${__dirname} /users.json`)
+server.delete('/api/v1/users', async (req, res) => {
+  unlink(`${__dirname}/users.json`)
   res.json({ status: 'ok' })
 })
 
