@@ -61,12 +61,11 @@ server.post('/api/v1/users', async (req, res) => {
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
-  let newUser = req.body
-  let users = await readData()
   const { userId } = req.params
-  newUser = { ...newUser, id: +userId }
-  users = users.filter((it) => it.id !== +userId)
-  users = [...users, newUser]
+  let users = await readData()
+  users = users.map((item) => {
+    return item.id !== +userId ? it : { ...it, ...req.body }
+  })
   await saveFile(users)
   res.json({ status: 'success', id: +userId })
 })
