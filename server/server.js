@@ -45,9 +45,9 @@ server.get('/api/v1/users', async (req, res) => {
 server.post('/api/v1/users', async (req, res) => {
   const newuser1 = req.body
   const users = await readData()
-  newuser1.id = users[users.lenght - 1].id + 1
-  const newUsers1 = users.concat(newuser1)
-  await saveFile(newUsers1)
+  newuser1.id = users[users.length - 1].id + 1
+  const newusers1 = users.concat(newuser1)
+  await saveFile(newusers1)
   res.json({ status: 'success', id: newuser1.id })
 })
 
