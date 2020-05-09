@@ -10,11 +10,10 @@ import Html from '../client/html'
 
 let connections = []
 
-
 const port = process.env.PORT || 3000
 const server = express()
 
-const { readFile, writeFile, unlink, stat } = require('fs').promises
+const { readFile, writeFile, unlink } = require('fs').promises
 
 server.use(cors())
 
@@ -81,14 +80,9 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users', async (req, res) => {
-  stat(`${__dirname}/users.json`)
-    .then(() => {
-      unlink(`${__dirname}/users.json`)
-      res.json({ status: 'ok' })
-    })
-    .catch((error) => res.json(error))
+  unlink(`${__dirname} /users.json`)
+  res.json({ status: 'ok' })
 })
-
 
 server.use('/api/', (req, res) => {
   res.status(404)
