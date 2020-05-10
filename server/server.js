@@ -10,8 +10,6 @@ import Html from '../client/html'
 
 let connections = []
 
-const filename = 'users.json'
-
 const port = process.env.PORT || 3000
 const server = express()
 
@@ -31,14 +29,12 @@ server.use((req, res, next) => {
 
 server.use(cookieParser())
 
-const saveFile = async (data) => {
-  // eslint-disable-next-line no-return-await
-  return await writeFile(`${__dirname}/${filename}`, JSON.stringify(data), { encoding: 'utf8' })
+const saveFile = async (users) => {
+  return writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
 }
 
-const readData = async (fileName) => {
-  // eslint-disable-next-line no-return-await
-  return await readFile(`${__dirname}/${fileName}`, { encoding: 'utf8' })
+const readData = async () => {
+  return readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
     .then((data) => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
@@ -48,55 +44,40 @@ const readData = async (fileName) => {
 }
 
 server.get('/api/v1/users', async (req, res) => {
-  const users = await readData(filename)
+  const users = await readData()
   res.json(users)
 })
 
 server.post('/api/v1/users', async (req, res) => {
-  let newUser = req.body
-  let users = await readData(filename)
-  let maxValue = 0
-  for (let i = 0; i < users.length; i += 1) {
-    if (maxValue < users[i].id) {
-      maxValue = users[i].id
-    }
-  }
-  maxValue += 1
-  newUser = { ...newUser, id: maxValue }
-  users = [...users, newUser]
-  await saveFile(users)
-  res.json({ status: 'success', id: maxValue })
+  const newuser1 = req.body
+  const users = await readData()
+  newuser1.id = users[users.length - 1].id + 1
+  const newusers1 = users.concat(newuser1)
+  await saveFile(newusers1)
+  res.json({ status: 'success', id: newuser1.id })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
-  let newUser = req.body
-  let users = await readData(filename)
   const { userId } = req.params
-  const currentUser = users.find((it) => it.id === +userId)
-  newUser = { ...currentUser, ...newUser }
-  users = users.filter((it) => it.id !== +userId)
-  users = [...users, newUser]
-  await saveFile(users)
+  const uses = await readData()
+  const newUsersd = uses.map((item) => {
+    return item.id !== +userId ? { ...item, ...req.body } : item
+  })
+  await saveFile(newUsersd)
   res.json({ status: 'success', id: +userId })
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  let users = await readData(filename)
+  const users = await readData()
   const { userId } = req.params
-  users = users.filter((it) => it.id !== +userId)
-  await saveFile(users)
+  const newUsersda = users.filter((it) => it.id !== +userId)
+  await saveFile(newUsersda)
   res.json({ status: 'success', id: +userId })
 })
 
-/*
 server.delete('/api/v1/users', async (req, res) => {
-  await unlink(`${__dirname}/${filename}`)
+  unlink(`${__dirname}/users.json`)
   res.json({ status: 'ok' })
-})
-*/
-server.delete('/api/v1/users', (req, res) => {
-  unlink(`${__dirname}/${filename}`)
-  res.json({ status: 'success' })
 })
 
 server.use('/api/', (req, res) => {
@@ -144,3 +125,4 @@ echo.installHandlers(app, { prefix: '/ws' })
 
 // eslint-disable-next-line no-console
 console.log(`Serving at http://localhost:${port}`)
+
