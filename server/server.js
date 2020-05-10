@@ -10,6 +10,8 @@ import Html from '../client/html'
 
 let connections = []
 
+const filename = 'users.json'
+
 const port = process.env.PORT || 3000
 const server = express()
 
@@ -21,14 +23,22 @@ server.use(express.static(path.resolve(__dirname, '../dist/assets')))
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
 server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
+server.use((req, res, next) => {
+  res.set('x-skillcrucial-user', '8a646531-edeb-4ee1-810d-bc6c5e19bb68')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
+  next()
+})
+
 server.use(cookieParser())
 
-const saveFile = async (users) => {
-  return writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
+const saveFile = async (data) => {
+  // eslint-disable-next-line no-return-await
+  return await writeFile(`${__dirname}/${filename}`, JSON.stringify(data), { encoding: 'utf8' })
 }
 
-const readData = async () => {
-  return readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
+const readData = async (fileName) => {
+  // eslint-disable-next-line no-return-await
+  return await readFile(`${__dirname}/${fileName}`, { encoding: 'utf8' })
     .then((data) => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
@@ -38,40 +48,55 @@ const readData = async () => {
 }
 
 server.get('/api/v1/users', async (req, res) => {
-  const users = await readData()
+  const users = await readData(filename)
   res.json(users)
 })
 
 server.post('/api/v1/users', async (req, res) => {
-  const newuser1 = req.body
-  const users = await readData()
-  newuser1.id = users[users.length - 1].id + 1
-  const newusers1 = users.concat(newuser1)
-  await saveFile(newusers1)
-  res.json({ status: 'success', id: newuser1.id })
+  let newUser = req.body
+  let users = await readData(filename)
+  let maxValue = 0
+  for (let i = 0; i < users.length; i += 1) {
+    if (maxValue < users[i].id) {
+      maxValue = users[i].id
+    }
+  }
+  maxValue += 1
+  newUser = { ...newUser, id: maxValue }
+  users = [...users, newUser]
+  await saveFile(users)
+  res.json({ status: 'success', id: maxValue })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
+  let newUser = req.body
+  let users = await readData(filename)
   const { userId } = req.params
-  const uses = await readData()
-  const newUsersd = uses.map((item) => {
-    return item.id !== +userId ? { ...item, ...req.body } : item
-  })
-  await saveFile(newUsersd)
-  res.json({ status: 'success', id: +userId })
-})
-
-server.delete('/api/v1/users/:userId', async (req, res) => {
-  const users = await readData()
-  const { userId } = req.params
-  users.filter((it) => it.id !== +userId)
+  const currentUser = users.find((it) => it.id === +userId)
+  newUser = { ...currentUser, ...newUser }
+  users = users.filter((it) => it.id !== +userId)
+  users = [...users, newUser]
   await saveFile(users)
   res.json({ status: 'success', id: +userId })
 })
 
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  let users = await readData(filename)
+  const { userId } = req.params
+  users = users.filter((it) => it.id !== +userId)
+  await saveFile(users)
+  res.json({ status: 'success', id: +userId })
+})
+
+/*
 server.delete('/api/v1/users', async (req, res) => {
-  unlink(`${__dirname}/users.json`)
+  await unlink(`${__dirname}/${filename}`)
   res.json({ status: 'ok' })
+})
+*/
+server.delete('/api/v1/users', (req, res) => {
+  unlink(`${__dirname}/${filename}`)
+  res.json({ status: 'success' })
 })
 
 server.use('/api/', (req, res) => {
