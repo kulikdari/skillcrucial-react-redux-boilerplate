@@ -68,11 +68,6 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: +userId })
 })
 
-server.delete('/api/v1/users', async (req, res) => {
-  console.log('here')
-  await unlink(`${__dirname}/${filename}`)
-  res.json({ status: 'success' })
-})
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const users = await readData(filename)
@@ -81,12 +76,12 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: +userId })
 })
 
-/*
+
 server.delete('/api/v1/users', async (req, res) => {
-  await unlink(`${__dirname}/${filename}`)
+  unlink(`${__dirname}/${filename}`)
   res.json({ status: 'ok' })
 })
-*/
+
 
 server.use('/api/', (req, res) => {
   res.status(404)
