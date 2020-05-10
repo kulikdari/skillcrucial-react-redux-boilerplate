@@ -24,7 +24,7 @@ server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit
 server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use((req, res, next) => {
-  res.set('x-skillcrucial-user', '8a646531-edeb-4ee1-810d-bc6c5e19bb68')
+  res.set('x-skillcrucial-user', 'd8726345-f8b6-4817-bad3-c59175cecb51');
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   next()
 })
