@@ -10,8 +10,6 @@ import Html from '../client/html'
 
 let connections = []
 
-
-
 const port = process.env.PORT || 3000
 const server = express()
 
@@ -24,7 +22,7 @@ server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit
 server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 const setHeaders = ((req, res, next) => {
-  res.set('x-skillcrucial-user', 'd8726345-f8b6-4817-bad3-c59175cecb51');
+  res.set('x-skillcrucial-user', 'd8726345-f8b6-4817-bad3-c59175cecb51')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   next()
 })
