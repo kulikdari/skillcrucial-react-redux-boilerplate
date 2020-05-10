@@ -10,6 +10,8 @@ import Html from '../client/html'
 
 let connections = []
 
+const filename = 'users.json'
+
 const port = process.env.PORT || 3000
 const server = express()
 
@@ -29,12 +31,14 @@ server.use((req, res, next) => {
 
 server.use(cookieParser())
 
-const saveFile = async (users) => {
-  return writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
+const saveFile = async (data) => {
+  // eslint-disable-next-line no-return-await
+  return await writeFile(`${__dirname}/${filename}`, JSON.stringify(data), { encoding: 'utf8' })
 }
 
-const readData = async () => {
-  return readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
+const readData = async (fileName) => {
+  // eslint-disable-next-line no-return-await
+  return await readFile(`${__dirname}/${fileName}`, { encoding: 'utf8' })
     .then((data) => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
@@ -44,41 +48,45 @@ const readData = async () => {
 }
 
 server.get('/api/v1/users', async (req, res) => {
-  const users = await readData()
+  const users = await readData(filename)
   res.json(users)
 })
 
 server.post('/api/v1/users', async (req, res) => {
-  const newuser1 = req.body
-  const users = await readData()
-  newuser1.id = users[users.length - 1].id + 1
-  const newusers1 = users.concat(newuser1)
-  await saveFile(newusers1)
-  res.json({ status: 'success', id: newuser1.id })
+  const users = await readData(filename)
+  const id = users[users.length - 1].id + 1
+  await saveFile([...users, { ...req.body, id }])
+  res.json({ status: 'success', id })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
+  let users = await readData(filename)
   const { userId } = req.params
-  const uses = await readData()
-  const newUsersd = uses.map((item) => {
-    return item.id !== +userId ? { ...item, ...req.body } : item
-  })
-  await saveFile(newUsersd)
-  res.json({ status: 'success', id: +userId })
-})
 
-server.delete('/api/v1/users/:userId', async (req, res) => {
-  const users = await readData()
-  const { userId } = req.params
-  const newUsersda = users.filter((it) => it.id !== +userId)
-  await saveFile(newUsersda)
+  users = users.map((it) => (it.id !== +userId ? it : { ...it, ...req.body }))
+  await saveFile(users)
   res.json({ status: 'success', id: +userId })
 })
 
 server.delete('/api/v1/users', async (req, res) => {
-  unlink(`${__dirname}/users.json`)
+  console.log('here')
+  await unlink(`${__dirname}/${filename}`)
+  res.json({ status: 'success' })
+})
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  const users = await readData(filename)
+  const { userId } = req.params
+  await saveFile(users.filter((it) => it.id !== +userId))
+  res.json({ status: 'success', id: +userId })
+})
+
+/*
+server.delete('/api/v1/users', async (req, res) => {
+  await unlink(`${__dirname}/${filename}`)
   res.json({ status: 'ok' })
 })
+*/
 
 server.use('/api/', (req, res) => {
   res.status(404)
@@ -125,4 +133,3 @@ echo.installHandlers(app, { prefix: '/ws' })
 
 // eslint-disable-next-line no-console
 console.log(`Serving at http://localhost:${port}`)
-
