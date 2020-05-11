@@ -67,17 +67,14 @@ server.post('/api/v1/users', async (req, res) => {
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const reqBody = req.body
-  reqBody.id = +userId
-  const users = await readF()
-  const checkId = users.map(function (it) {
-    if (it.id === reqBody.id) {
-      return { ...it, ...reqBody }
-    }
-    return it
+  const addInf = req.body
+  const uses = await readData()
+  addInf.id = +userId
+  const newUsersd = uses.map((item) => {
+    return item.id !== +userId ? { ...item, ...addInf } : item
   })
-  await saveF(checkId)
-  res.json({ status: 'success', id: +userId, body: reqBody })
+  await saveF(newUsersd)
+  res.json({ status: 'success', id: +userId })
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
