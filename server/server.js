@@ -30,58 +30,62 @@ server.use(setHeaders)
 
 server.use(cookieParser())
 
-const saveF = async (users) => {
-  const result = await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" })
+const saveFile = async (users) => {
+  const result = await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: "utf8" })
   return result
 }
 
-const readF = async () => {
-  const result = await readFile(`${__dirname}/test.json`, { encoding: "utf8" })
+const readData = async () => {
+  const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })
     .then(data => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-      await saveF(users)
+      await saveFile(users)
       return users
     })
   return result
 }
 
 server.get('/api/v1/users', async (req, res) => {
-  const users = await readF()
+  const users = await readData()
   res.json(users)
 })
 
 server.delete('/api/v1/users', async (req, res) => {
-  unlink(`${__dirname}/test.json`)
+  unlink(`${__dirname}/users.json`)
   res.json({})
 })
 
 server.post('/api/v1/users', async (req, res) => {
-  const users = await readF()
+  const users = await readData()
   const newUser = req.body
   newUser.id = users[users.length - 1].id + 1
   const newArr = [...users, newUser]
-  await saveF(newArr)
+  await saveFile(newArr)
   res.json({ status: 'success', id: newUser.id })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const addInf = req.body
-  const uses = await readData()
-  addInf.id = +userId
-  const newUsersd = uses.map((item) => {
-    return item.id !== +userId ? { ...item, ...addInf } : item
+  const reqBody = req.body
+  reqBody.id = +userId
+  const users = await readData()
+  const checkId = users.map(function (it) {
+    if (it.id === reqBody.id) {
+      return { ...it, ...reqBody }
+    }
+    return it
   })
-  await saveF(newUsersd)
-  res.json({ status: 'success', id: +userId })
+  await saveFile(checkId)
+  res.json({ status: 'success', id: +userId, body: reqBody })
 })
+
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const users = await readF()
-  const checkElement = users.filter(it => it.id !== +userId)
-  await saveF(checkElement)
+  const users = await readData()
+  const checkE = users.filter(it => it.id !== +userId)
+  await saveFile(checkE)
   res.json({ status: 'success', id: +userId })
 })
 
