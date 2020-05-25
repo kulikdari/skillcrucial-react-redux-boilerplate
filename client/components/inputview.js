@@ -13,6 +13,9 @@ const InputView = () => {
   }
   return (
     <div>
+      <div id="bg" className="bg-scroll">
+        <img src="images/bg.jpg" alt="" />
+      </div>
       <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4 sm:px-6 lg:px-8">
         <input
           type="text"

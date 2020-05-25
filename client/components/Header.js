@@ -16,7 +16,7 @@ const Header = () => {
         </div>
 
         {username && (
-          <Link id="go back" to="/">
+          <Link id="go-back" to="/">
             <button
               type="button"
               className="bg-grey-400 hover:bg-blue-700 text-white font-bold py-2 px-2"
