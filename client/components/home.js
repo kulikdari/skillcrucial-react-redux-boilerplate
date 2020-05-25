@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import axios from 'axios'
 import Header from './Header'
-import Inputview from './inputview'
+import InputView from './inputview'
 import User from './User'
 import Repodet from './Repodet'
 import DumnyComponent from './dummy-view'
@@ -40,7 +40,7 @@ const Home = () => {
     <div>
       <Header />
       <Switch>
-        <Route exact path="/" component={() => <Inputview />} />
+        <Route exact path="/" component={() => <InputView />} />
         <Route exact path="/:username" component={() => <User list={repos} name={username} />} />
         <Route
           exact

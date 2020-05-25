@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { history } from '../redux'
-import './inputview.css'
 
 const InputView = () => {
   const [username, setUserName] = useState('')
@@ -13,7 +12,7 @@ const InputView = () => {
     setUserName(e.target.value)
   }
   return (
-    <div className="inputview">
+    <div>
       <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4 sm:px-6 lg:px-8">
         <input
           type="text"
