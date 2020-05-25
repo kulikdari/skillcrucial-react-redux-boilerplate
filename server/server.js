@@ -21,23 +21,25 @@ server.use(express.static(path.resolve(__dirname, '../dist/assets')))
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
 server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
-const setHeaders = ((req, res, next) => {
+const setHeaders = (req, res, next) => {
   res.set('x-skillcrucial-user', 'd8726345-f8b6-4817-bad3-c59175cecb51')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   next()
-})
+}
 server.use(setHeaders)
 
 server.use(cookieParser())
 
 const saveFile = async (users) => {
-  const result = await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: "utf8" })
+  const result = await writeFile(`${__dirname}/users.json`, JSON.stringify(users), {
+    encoding: 'utf8'
+  })
   return result
 }
 
 const readData = async () => {
-  const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })
-    .then(data => JSON.parse(data))
+  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
+    .then((data) => JSON.parse(data))
     .catch(async () => {
       const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
       await saveFile(users)
@@ -70,7 +72,7 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
   const reqBody = req.body
   reqBody.id = +userId
   const users = await readData()
-  const checkId = users.map(function (it) {
+  const checkId = users.map(function(it) {
     if (it.id === reqBody.id) {
       return { ...it, ...reqBody }
     }
@@ -80,15 +82,13 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: +userId, body: reqBody })
 })
 
-
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   const users = await readData()
-  const checkE = users.filter(it => it.id !== +userId)
+  const checkE = users.filter((it) => it.id !== +userId)
   await saveFile(checkE)
   res.json({ status: 'success', id: +userId })
 })
-
 
 server.use('/api/', (req, res) => {
   res.status(404)
@@ -98,7 +98,7 @@ server.use('/api/', (req, res) => {
 const echo = sockjs.createServer()
 echo.on('connection', (conn) => {
   connections.push(conn)
-  conn.on('data', async () => { })
+  conn.on('data', async () => {})
 
   conn.on('close', () => {
     connections = connections.filter((c) => c.readyState !== 3)
